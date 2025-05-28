@@ -7,6 +7,7 @@ load_dotenv()
 
 # Access the key from the environment
 google_api_key = os.getenv("GOOGLE_API_KEY")
+print(google_api_key)
 
 # Setup Gemini LLM
 llm = ChatGoogleGenerativeAI(

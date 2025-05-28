@@ -1,7 +1,13 @@
 pip install fastapi uvicorn langgraph langchain langchain-google-genai nest_asyncio
 pip install uvicorn
+pip install python-dotenv
+pip install mysql-connector-python
+
 OR
 python -m pip install uvicorn
 python -m pip install python-dotenv
 
 python -m uvicorn main:app --reload
+
+----
+Need mySQL notifier, mysql, mysqlworkbench

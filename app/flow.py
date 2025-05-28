@@ -1,24 +1,34 @@
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
-from .schema import OrderState
-from .tools import auto_tools, order_tools
-from .nodes import chatbot_with_tools, human_node, order_node, maybe_exit_human_node, maybe_route_to_tools
+from .schema import GoalState
+from .tools import goal_auto_tools, goal_action_tools, llm_with_tools
+from .nodes import *
 from config import llm
 
-llm_with_tools = llm.bind_tools(auto_tools + order_tools)
-tool_node = ToolNode(auto_tools)
-
 def build_flow():
-    builder = StateGraph(OrderState)
-    builder.add_node("chatbot", chatbot_with_tools(llm_with_tools))
-    builder.add_node("human", human_node)
-    builder.add_node("tools", tool_node)
-    builder.add_node("ordering", order_node)
+# Define the graph
+    graph_builder = StateGraph(GoalState)
 
-    builder.add_conditional_edges("chatbot", lambda state: maybe_route_to_tools(state, tool_node))
-    builder.add_conditional_edges("human", maybe_exit_human_node)
-    builder.add_edge("tools", "chatbot")
-    builder.add_edge("ordering", "chatbot")
-    builder.add_edge(START, "chatbot")
+    # Nodes
+    graph_builder.add_node("goal_ai", goal_ai_with_tools)
+    graph_builder.add_node("human", human_node)
+    graph_builder.add_node("goal_tools", ToolNode(goal_auto_tools))
+    graph_builder.add_node("goal_actions", ToolNode(goal_action_tools))
+
+    # Routing
+    # AI model may send to tools or human
+    graph_builder.add_conditional_edges("goal_ai", maybe_route_goal_tools)
+    # Human routes to AI or END
+    graph_builder.add_conditional_edges("human", maybe_exit_human_node)
+
+    # After tool execution, go back to AI
+    graph_builder.add_edge("goal_tools", "goal_ai")
+    graph_builder.add_edge("goal_actions", "goal_ai")
+
+    # Start from AI
+    graph_builder.add_edge(START, "goal_ai")
+
+    # Compile graph
+    goal_flow_graph = graph_builder.compile()
     
-    return builder.compile()
+    return goal_flow_graph

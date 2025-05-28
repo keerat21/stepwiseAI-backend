@@ -14,7 +14,8 @@ async def handle_connection(user_id: str, websocket: WebSocket):
         result = await graph.ainvoke({
             "user_id": user_id,
             "messages": [],
-            "order": [],
+            "goals": [],
+            "routines":{},
             "finished": False
         }, config)
 
