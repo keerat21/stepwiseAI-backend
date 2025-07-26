@@ -2,12 +2,18 @@ pip install fastapi uvicorn langgraph langchain langchain-google-genai nest_asyn
 pip install uvicorn
 pip install python-dotenv
 pip install mysql-connector-python
+pip install google-auth
+
 
 OR
 python -m pip install uvicorn
 python -m pip install python-dotenv
+...
 
+Run:
 python -m uvicorn main:app --reload
 
 ----
 Need mySQL notifier, mysql, mysqlworkbench
+load the DB/import
+GoogleAPI gemnini key needed

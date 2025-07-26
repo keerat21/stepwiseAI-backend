@@ -12,9 +12,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.websocket("/ws/{user_id}")
-async def websocket_route(websocket: WebSocket, user_id: str):
-    await handle_connection(user_id, websocket)
+@app.websocket("/ws")
+async def websocket_route(websocket: WebSocket):
+    await handle_connection(websocket)
+
 
 # if __name__ == "__main__":
 #     import uvicorn
