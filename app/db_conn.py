@@ -2,7 +2,7 @@
 
 import mysql.connector
 from mysql.connector import Error
-from config import configDB
+from config import DB_CONFIG
 import logging
 
 # Configure logging
@@ -57,10 +57,10 @@ def get_cursor():
         if db_conn is None or not db_conn.is_connected():
             logger.info("Establishing new database connection...")
             db_conn = mysql.connector.connect(
-                host=configDB["host"],
-                user=configDB["user"],
-                password=configDB["password"],
-                database=configDB["database"]
+                host=DB_CONFIG["host"],
+                user=DB_CONFIG["user"],
+                password=DB_CONFIG["password"],
+                database=DB_CONFIG["database"]
             )
             logger.info("Database connection established successfully")
             # Initialize tables on first connection

@@ -6,27 +6,20 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 load_dotenv()
 
 # Access the key from the environment
-google_api_key = os.getenv("GOOGLE_API_KEY")
-google_client_id = os.getenv("GOOGLE_CLIENT_ID")
-print(google_api_key)
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# Setup Gemini LLM
+# Gemini LLM setup
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash",
-    google_api_key=google_api_key,
+    google_api_key=GOOGLE_API_KEY,
     temperature=0.1
 )
 
-# Config for LangGraph
-configAuth = {
-    "GOOGLE_CLIENT_ID": google_client_id,  # Replace with your actual Google Client ID
-}
-
-configDB = {
+# Database configuration
+DB_CONFIG = {
     "host": "localhost",
     "user": "root",
     "password": "rootroot",
     "database": "goal_achiever"
 }
-
-config = {"recursion_limit": 100}
