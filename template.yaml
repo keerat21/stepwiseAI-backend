@@ -7,7 +7,7 @@ Parameters:
     Description: Google OAuth Client ID used by verify_google_token
   DbHost:
     Type: String
-    Description: RDS or RDS Proxy endpoint (recommended: Proxy)
+    Description: "RDS or RDS Proxy endpoint (recommended: Proxy)
   DbUser:
     Type: String
   DbPassword:
