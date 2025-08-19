@@ -1,0 +1,60 @@
+name: Deploy WebSocket Backend (SAM)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      STACK_NAME: ${{ vars.STACK_NAME }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # (Optional) quick sanity: lint/tests if you have them
+      # - run: pytest -q || true
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::908027399785:role/GithubOIDCDeploy  
+          aws-region: ${{ vars.AWS_REGION }}
+
+      # Build Lambda with dependencies from requirements.txt
+      - name: SAM build
+        run: sam build --use-container
+
+      # Deploy the stack with parameter overrides
+      - name: SAM deploy
+        run: >
+          sam deploy
+          --no-confirm-changeset
+          --stack-name "${{ env.STACK_NAME }}"
+          --capabilities CAPABILITY_IAM
+          --parameter-overrides
+          GoogleClientId='${{ secrets.GOOGLE_CLIENT_ID }}'
+          DbHost='${{ vars.DB_HOST }}'
+          DbUser='${{ vars.DB_USER }}'
+          DbPassword='${{ secrets.DB_PASSWORD }}'
+          DbName='${{ vars.DB_NAME }}'
+          DbPort='${{ vars.DB_PORT }}'
+          SubnetIds='${{ vars.SUBNET_IDS }}'
+          SecurityGroupIds='${{ vars.SECURITY_GROUP_IDS }}'
+
+      # Show the WebSocket URL output (use in your frontend)
+      - name: Print WebSocket URL
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name "${{ env.STACK_NAME }}" \
+            --query "Stacks[0].Outputs[?OutputKey=='WSSocketUrl'].OutputValue" \
+            --output text
