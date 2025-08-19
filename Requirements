@@ -4,6 +4,7 @@ uvicorn
 python-dotenv
 mysql-connector-python
 google-auth
+boto3
 
 # Installation commands:
 # pip install fastapi uvicorn python-dotenv mysql-connector-python google-auth

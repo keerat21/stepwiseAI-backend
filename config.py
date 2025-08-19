@@ -17,9 +17,12 @@ llm = ChatGoogleGenerativeAI(
 )
 
 # Database configuration
+
 DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",
-    "password": "rootroot",
-    "database": "goal_achiever"
+    "host":     os.environ["DB_HOST"],
+    "user":     os.environ["DB_USER"],
+    "password": os.environ["DB_PASSWORD"],
+    "database": os.environ["DB_NAME"],
+    "port":     int(os.environ.get("DB_PORT", "3306")),
+    "connection_timeout": 5,
 }

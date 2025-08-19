@@ -1,0 +1,117 @@
+Transform: AWS::Serverless-2016-10-31
+Description: WebSocket API (API Gateway) + Lambda + MySQL (via RDS/Proxy)
+
+Parameters:
+  GoogleClientId:
+    Type: String
+    Description: Google OAuth Client ID used by verify_google_token
+  DbHost:
+    Type: String
+    Description: RDS or RDS Proxy endpoint (recommended: Proxy)
+  DbUser:
+    Type: String
+  DbPassword:
+    Type: String
+    NoEcho: true
+  DbName:
+    Type: String
+  DbPort:
+    Type: Number
+    Default: 3306
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Private subnet IDs with egress/NAT so Lambda can reach RDS/Proxy
+  SecurityGroupIds:
+    Type: List<AWS::EC2::SecurityGroup::Id>
+    Description: SGs for Lambda; must be allowed to connect to DB/Proxy on 3306
+
+Resources:
+  # --- API Gateway WebSocket ------------------------------------------------
+  WsApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: GoalWS
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.type"   # routes by your 'type'
+
+  # Lambda that handles all routes ($connect/$disconnect + auth/add_goal/chat)
+  WsFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: lambda_ws.handler
+      Runtime: python3.12
+      Architectures: [ arm64 ]
+      MemorySize: 256
+      Timeout: 15
+      VpcConfig:
+        SubnetIds: !Ref SubnetIds
+        SecurityGroupIds: !Ref SecurityGroupIds
+      Environment:
+        Variables:
+          GOOGLE_CLIENT_ID: !Ref GoogleClientId
+          DB_HOST: !Ref DbHost
+          DB_USER: !Ref DbUser
+          DB_PASSWORD: !Ref DbPassword
+          DB_NAME: !Ref DbName
+          DB_PORT: !Ref DbPort
+      Policies:
+        # Allow Lambda to push messages back to clients
+        - Statement:
+            - Effect: Allow
+              Action: execute-api:ManageConnections
+              Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WsApi}/*"
+
+  # Integration (Lambda proxy) for the WebSocket API
+  Integration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WsApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WsFn.Arn}/invocations"
+      TimeoutInMillis: 29000
+
+  # Routes (your message types + lifecycle events)
+  RouteConnect:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref WsApi, RouteKey: "$connect",   Target: !Sub "integrations/${Integration}" }
+  RouteDisconnect:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref WsApi, RouteKey: "$disconnect", Target: !Sub "integrations/${Integration}" }
+  RouteDefault:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref WsApi, RouteKey: "$default",    Target: !Sub "integrations/${Integration}" }
+  RouteAuth:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref WsApi, RouteKey: "auth",        Target: !Sub "integrations/${Integration}" }
+  RouteAddGoal:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref WsApi, RouteKey: "add_goal",    Target: !Sub "integrations/${Integration}" }
+  RouteChat:
+    Type: AWS::ApiGatewayV2::Route
+    Properties: { ApiId: !Ref WsApi, RouteKey: "chat",        Target: !Sub "integrations/${Integration}" }
+
+  # Allow API Gateway to invoke the Lambda
+  WsPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref WsFn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WsApi}/*"
+
+  # Stage (auto-deploy on each change)
+  WsStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref WsApi
+      StageName: prod
+      AutoDeploy: true
+
+Outputs:
+  WSSocketUrl:
+    Description: WebSocket URL to use from your frontend
+    Value: !Sub "wss://${WsApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  WsApiId:
+    Description: API ID (helpful for debugging/CloudWatch logs)
+    Value: !Ref WsApi

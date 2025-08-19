@@ -16,6 +16,21 @@ def init_tables():
     """Initialize database tables if they don't exist."""
     try:
         cursor = get_cursor()
+
+        
+        # Create ws-connections table 
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS ws_connections (
+            connection_id VARCHAR(128) PRIMARY KEY,
+            user_id       VARCHAR(255) NOT NULL,
+            expires_at    DATETIME NULL,
+            created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB;
+                        )
+        """)     
+        cursor.execute("""
+            CREATE INDEX idx_expires_at ON ws_connections (expires_at);
+        """)    
         
         # Create goals table
         cursor.execute("""
