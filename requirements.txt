@@ -7,7 +7,6 @@ python-multipart
 
 # Authentication
 google-auth
-google-auth-transport-requests
 requests
 
 # Environment and configuration
