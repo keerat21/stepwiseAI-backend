@@ -21,5 +21,5 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . .
 
 # Change "app.main:app" to your module:variable
-EXPOSE 8080
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-w", "2", "-b", "0.0.0.0:8080", "app.main:app"]
+EXPOSE 8002
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-w", "2", "-b", "0.0.0.0:8002", "app.main:app"]
