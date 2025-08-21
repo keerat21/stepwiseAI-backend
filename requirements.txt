@@ -1,7 +1,22 @@
-fastapi>=0.111
-uvicorn[standard]>=0.30
-gunicorn>=21.2
-google-auth>=2.31
-requests>=2.32
-python-multipart>=0.0.9
-langchain>=0.3.1
+# Core FastAPI dependencies
+fastapi
+uvicorn
+websockets
+gunicorn
+python-multipart
+
+# Authentication
+google-auth
+google-auth-transport-requests
+requests
+
+# Environment and configuration
+python-dotenv
+
+# Database
+mysql-connector-python
+
+# LangChain and LLM
+langchain-core
+langchain-google-genai
+langchain
