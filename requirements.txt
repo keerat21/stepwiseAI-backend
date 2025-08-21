@@ -1,8 +1,6 @@
-fastapi
-uvicorn
-websockets
-requests
-google-auth
-google-auth-transport-requests
-gunicorn
-python-multipart
+fastapi>=0.111
+uvicorn[standard]>=0.30
+gunicorn>=21.2
+google-auth>=2.31
+requests>=2.32
+python-multipart>=0.0.9
