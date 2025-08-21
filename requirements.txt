@@ -4,3 +4,4 @@ gunicorn>=21.2
 google-auth>=2.31
 requests>=2.32
 python-multipart>=0.0.9
+langchain>=0.3.1
