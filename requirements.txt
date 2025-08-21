@@ -1,10 +1,13 @@
 # Core dependencies
 fastapi
-uvicorn
 python-dotenv
 mysql-connector-python
 google-auth
 boto3
+fastapi
+uvicorn[standard]
+gunicorn
+
 
 # Installation commands:
 # pip install fastapi uvicorn python-dotenv mysql-connector-python google-auth
