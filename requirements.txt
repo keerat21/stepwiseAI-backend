@@ -1,21 +1,8 @@
-# Core dependencies
 fastapi
-python-dotenv
-mysql-connector-python
+uvicorn
+websockets
+requests
 google-auth
-boto3
-fastapi
-uvicorn[standard]
+google-auth-transport-requests
 gunicorn
-
-
-# Installation commands:
-# pip install fastapi uvicorn python-dotenv mysql-connector-python google-auth
-
-# Run the application:
-# python -m uvicorn main:app --reload
-
-# Prerequisites:
-# - MySQL server running
-# - Google OAuth client ID in .env file
-# - Database 'goal_achiever' created
+python-multipart
