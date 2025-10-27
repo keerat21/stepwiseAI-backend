@@ -24,7 +24,7 @@ def init_tables():
             connection_id VARCHAR(128) PRIMARY KEY,
             user_id       VARCHAR(255) NOT NULL,
             expires_at    DATETIME NULL,
-            created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             INDEX idx_expires_at (expires_at)
             ) ENGINE=InnoDB
         """)     
