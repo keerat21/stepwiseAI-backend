@@ -25,11 +25,9 @@ def init_tables():
             user_id       VARCHAR(255) NOT NULL,
             expires_at    DATETIME NULL,
             created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            INDEX idx_expires_at (expires_at)
             ) ENGINE=InnoDB
         """)     
-        cursor.execute("""
-            CREATE INDEX idx_expires_at ON ws_connections (expires_at);
-        """)    
         
         # Create goals table
         cursor.execute("""
